@@ -1015,45 +1015,45 @@ def solve(original_puzzle):
         report[0] += r0
         r_step += r0
         
-##        if all_at_once or r_step == 0:
-##            r1 = hidden_single(puzzle)
-##            report[1] += r1
-##            r_step += r1
-##
-##        if all_at_once or r_step == 0:
-##            r2 = csp(puzzle)
-##            report[2] +=  r2
-##            r_step += r2
-##
-##        if all_at_once or r_step == 0:
-##            r3 = intersect(puzzle)
-##            report[3] +=  r3
-##            r_step += r3
-##
-##        if all_at_once or r_step == 0:
-##            r4 = x_wing(puzzle)
-##            report[4] +=  r4
-##            r_step += r4
-##
-##        if all_at_once or r_step == 0:
-##            r5 = coloring(puzzle)
-##            report[5] +=  r5
-##            r_step += r5
-##
-##        if all_at_once or r_step == 0:
-##            r6 = y_wing(puzzle)
-##            report[6] +=  r6
-##            r_step += r6
-##
-##        if all_at_once or r_step == 0:
-##            r7 = nice_chains(puzzle)
-##            report[7] +=  r7
-##            r_step += r7
-##            
-##        if all_at_once or r_step == 0:
-##            r8 = medusa_3d(puzzle) 
-##            report[8] +=  r8
-##            r_step += r8
+        if all_at_once or r_step == 0:
+            r1 = hidden_single(puzzle)
+            report[1] += r1
+            r_step += r1
+
+        if all_at_once or r_step == 0:
+            r2 = csp(puzzle)
+            report[2] +=  r2
+            r_step += r2
+
+        if all_at_once or r_step == 0:
+            r3 = intersect(puzzle)
+            report[3] +=  r3
+            r_step += r3
+
+        if all_at_once or r_step == 0:
+            r4 = x_wing(puzzle)
+            report[4] +=  r4
+            r_step += r4
+
+        if all_at_once or r_step == 0:
+            r5 = coloring(puzzle)
+            report[5] +=  r5
+            r_step += r5
+
+        if all_at_once or r_step == 0:
+            r6 = y_wing(puzzle)
+            report[6] +=  r6
+            r_step += r6
+
+        if all_at_once or r_step == 0:
+            r7 = nice_chains(puzzle)
+            report[7] +=  r7
+            r_step += r7
+            
+        if all_at_once or r_step == 0:
+            r8 = medusa_3d(puzzle) 
+            report[8] +=  r8
+            r_step += r8
 ##
 ##        if r_step == 0:
 ##            bug (puzzle)
