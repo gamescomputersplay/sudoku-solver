@@ -751,7 +751,7 @@ def get_next_cell_to_force(s):
         if len(s[i,j])>1:
             return (i,j)
         
-def brute_force(s):
+def brute_force(s, verbose):
     solution = []
     t = time.time()
     iter_counter = 0
@@ -789,10 +789,12 @@ def brute_force(s):
     iteration(s)
     
     if len(solution)>0:
-        print ("Brute forcing took:", time.time()-t, "seconds,", iter_counter, "attempts")
+        if verbose:
+            print ("Brute force took:", time.time()-t, "seconds, with", iter_counter, "attempts made")
         return solution
     
     # this is only if puzzle is broken and couldn't be forced
+    print ("The puzzle appears to be broken")
     return s
 
                         
@@ -849,7 +851,7 @@ def n_to_remove(sudoku):
 
 
 
-def solve(original_puzzle):
+def solve(original_puzzle, verbose):
     
     report = [0]*10
     #print (sudoku_to_line(original_puzzle))
@@ -858,7 +860,8 @@ def solve(original_puzzle):
     #print_sudoku(puzzle)
     solved = n_solved(puzzle)
     to_remove = n_to_remove(puzzle)
-    print ("Puzzle:", solved,"/81. Condidates to remove:", to_remove)
+    if verbose:
+        print ("Initial puzzle: solved cells", solved,"/81. Condidates to remove:", to_remove)
 
     t = time.time()
     
@@ -927,12 +930,13 @@ def solve(original_puzzle):
         
 
     #print_sudoku(puzzle)
-    print ("Solved:", solved,"/81. To remove:", to_remove)
-    print ("Logic part took:", time.time()-t)
+    if verbose:
+        print ("Solved with logic: numberof cells", solved,"/81. Candidates to remove:", to_remove)
+        print ("Logic part took:", time.time()-t)
 
     if to_remove>0:
         for_brute = n_to_remove(puzzle)
-        puzzle = brute_force(puzzle)
+        puzzle = brute_force(puzzle, verbose)
         report[9] += for_brute
     #print_sudoku(puzzle)
         
@@ -946,7 +950,8 @@ def solve(original_puzzle):
     # 6: Y-Wing
     # 7: Nice chains
     # 8: Medusa
-    print ("Report:", report, " \n")
+    if verbose:
+        print ("Report:", report, " \n")
     return puzzle
 
 
@@ -957,7 +962,7 @@ def line_from_solution(sol):
             out += str(b[0])
     return out
 
-def solve_from_line(line):
+def solve_from_line(line, verbose=False):
     s_str = ""
     raw_s = line[0:81]
     for ch in raw_s:
@@ -965,13 +970,16 @@ def solve_from_line(line):
     s_np1 = np.fromstring(s_str, dtype=int, count=-1, sep=' ')
     s_np = np.reshape(s_np1, (9,9) )
     #print (raw_s)
-    return line_from_solution(solve(s_np))              
+    return line_from_solution(solve(s_np, verbose))              
 
 
+if __name__ == "__main__":
+    
+    # Short demo solving of a puzzles
+    
+    puzzle = '100070009008096300050000020010000000940060072000000040030000080004720100200050003'
+    #puzzle = '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
 
-# Run from line
-puzzle = '100070009008096300050000020010000000940060072000000040030000080004720100200050003'
-#puzzle = '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
-
-solution = solve_from_line(puzzle)
-print (solution)
+    solution = solve_from_line(puzzle, verbose=True)
+    
+    print (solution)
