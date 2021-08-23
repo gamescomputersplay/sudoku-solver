@@ -29,7 +29,6 @@ all_houses = all_columns+all_rows+all_blocks
 # Some helper functions
 #################################################
 
-
 # returns list [(0,0), (0,1) .. (a-1,b-1)]
 # kind of like "range" but for 2d array
 def range2(a, b):
@@ -47,9 +46,49 @@ def pencil_in_numbers(puzzle):
             sudoku[i][j] = [puzzle[i,j],]
         else:
             sudoku[i][j] = [1,2,3,4,5,6,7,8,9]
-    return sudoku
+    return sudoku              
 
-# Below is the 10 methods solver is using
+# Count solved cells
+def n_solved(sudoku):
+    solved = 0
+    for (i,j) in range2(9,9):
+        if len(sudoku[i,j])==1:
+            solved += 1
+    return solved
+
+# Count remaining unsolved candidates to remove
+def n_to_remove(sudoku):
+    to_remove = 0
+    for (i,j) in range2(9,9):
+        to_remove += len(sudoku[i,j])-1
+    return to_remove
+
+# Print full sudoku, with all candidates (rather messy)       
+def print_sudoku(sudoku):
+    for j in range(9):
+        out_string="|"
+        out_string2=" "*10+"|"
+        for i in range(9):
+            if len(sudoku[i,j])==1:
+                out_string2 += str(sudoku[i,j][0])+" "
+            else:
+                out_string2 += "  "
+
+            for k in range(len(sudoku[i,j])):
+                out_string += str(sudoku[i,j][k])
+            for k in range(10-len(sudoku[i,j])):
+                out_string +=  " "
+            if (i+1)%3==0:
+                out_string += " | "
+                out_string2 += "|"
+
+        if (j)%3==0:
+            print ("-"*99, " "*10, "-"*22)
+        print (out_string, out_string2)
+    print ("-"*99,  " "*10, "-"*22)
+
+    
+# The 10 methods solver is using
 #########################################
 
 # 0. Simple Elimination
@@ -807,44 +846,6 @@ def brute_force(s, verbose):
 
                         
         
-#############################
-# Some admin function
-                
-def print_sudoku(sudoku):
-    for j in range(9):
-        out_string="|"
-        out_string2=" "*10+"|"
-        for i in range(9):
-            if len(sudoku[i,j])==1:
-                out_string2 += str(sudoku[i,j][0])+" "
-            else:
-                out_string2 += "  "
-
-            for k in range(len(sudoku[i,j])):
-                out_string += str(sudoku[i,j][k])
-            for k in range(10-len(sudoku[i,j])):
-                out_string +=  " "
-            if (i+1)%3==0:
-                out_string += " | "
-                out_string2 += "|"
-
-        if (j)%3==0:
-            print ("-"*99, " "*10, "-"*22)
-        print (out_string, out_string2)
-    print ("-"*99,  " "*10, "-"*22)                
-
-def n_solved(sudoku):
-    solved = 0
-    for (i,j) in range2(9,9):
-        if len(sudoku[i,j])==1:
-            solved += 1
-    return solved
-
-def n_to_remove(sudoku):
-    to_remove = 0
-    for (i,j) in range2(9,9):
-        to_remove += len(sudoku[i,j])-1
-    return to_remove
 
 
 # Main Solver
@@ -861,12 +862,14 @@ def solve(original_puzzle, verbose):
         print ("Initial puzzle: complete cells", solved,"/81. Condidates to remove:", to_remove)
 
     t = time.time()
-    
+
+    # Control how solver goes thorugh metods:
+    # False - go back to previous method if the next one yeld results
+    # True - try all methods one by one and then go back
     all_at_once = False
     
     while to_remove != 0:
         r_step = 0
-        #solution
         r0 = simple_elimination(puzzle)
         report[0] += r0
         r_step += r0
