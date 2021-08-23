@@ -26,6 +26,10 @@ all_blocks = [[((i//3)*3+j//3,(i%3)*3+j%3) for j in range(9)] for i in range(9)]
 all_houses = all_columns+all_rows+all_blocks
 
 
+# Some helper functions
+#################################################
+
+
 # returns list [(0,0), (0,1) .. (a-1,b-1)]
 # kind of like "range" but for 2d array
 def range2(a, b):
@@ -45,11 +49,12 @@ def pencil_in_numbers(puzzle):
             sudoku[i][j] = [1,2,3,4,5,6,7,8,9]
     return sudoku
 
+# Below is the 10 methods solver is using
+#########################################
 
-###################################
-#Basic logic
-
+# 0. Simple Elimination
 # If there is one number in cell - remove it from the house
+###################################
 def simple_elimination(sudoku):
     count = 0
     for group in all_houses:
@@ -62,9 +67,9 @@ def simple_elimination(sudoku):
     return count                         
                    
             
-
-
+# 1. Hidden Single
 # if there is only one instance of N in house - keep only it
+###################################
 def hidden_single(sudoku):
     
     def find_only_number_in_group():
@@ -90,8 +95,11 @@ def hidden_single(sudoku):
     return count
 
 
+
+# 2. CSP
+# brute force CSP solution for each cell:
+# it covers hidden and naked pairs, triples, quads
 ################################################
-# CSP brute force - covers hidden and naked pairs, triples, quads
 def csp_list(inp):
 
     perm = []
@@ -139,9 +147,9 @@ def csp(s):
     return count
  
 
-####################
-# Intersection logic (poiting pairs, box line reduction)
-
+# 3. Intersection
+# includes: poiting pairs, box line reduction
+#############################################
 def n_from_cells(s, cells):
     numbers = []
     for cell in cells:
@@ -189,8 +197,10 @@ def intersect(s):
 
 
 
-##########################################################
-# X-Wing (it actually is a subset of Nice-chains, but okay                    
+# 4. X-Wing
+# it actually is a subset of Nice-chains, but okay,
+# let's keep it because it is kind of famous
+##################################################
 def n_from_cells_dup(s, cells):
     numbers = []
     for cell in cells:
@@ -236,8 +246,8 @@ def x_wing(s):
 
 
 
+# 5. Coloring                               
 ##############################
-# Coloring logic                                
 def get_a_hard_link(s, n, group, add_n=False):
     links = []
     for cell in group:
@@ -350,8 +360,8 @@ def coloring(s):
     return count
 
 
-##################################
-# Y-Wing logic
+# 6. Y-Wing
+#############
 def y_wing(s):
     count = 0
     hard_links = []
@@ -381,8 +391,9 @@ def y_wing(s):
     return count
 
 
+# 7. Nice Chains
+# a.k.a. X-cycles, nice loops
 ################################
-# X-cycles (nice loops)
 def get_soft_links_from_group(s, n, group):
     found = []
     for cell in group:
@@ -505,9 +516,8 @@ def nice_chains(s):
     return count
 
 
-
-###########
-# 3D Medusa
+# 8. 3D Medusa
+##############
 def get_all_bicells(s):
     bicells = []
     for (i,j) in range2(9,9):
@@ -731,6 +741,9 @@ def medusa_3d(s):
 
 
 
+# 9. Backtracking
+# a.k.a. Brute Force
+#####################
 def is_broken(s):
     for house in all_houses:
         house_data = []
@@ -795,7 +808,7 @@ def brute_force(s, verbose):
                         
         
 #############################
-# Other admin function
+# Some admin function
                 
 def print_sudoku(sudoku):
     for j in range(9):
@@ -820,16 +833,6 @@ def print_sudoku(sudoku):
         print (out_string, out_string2)
     print ("-"*99,  " "*10, "-"*22)                
 
-def sudoku_to_line(puzzle):
-    out_string = ""
-    for (i,j) in range2(9,9):
-        if puzzle[i,j]!=0:
-            out_string += str(puzzle[i,j])
-        else:
-            out_string += "0"
-    return out_string
-
-
 def n_solved(sudoku):
     solved = 0
     for (i,j) in range2(9,9):
@@ -844,12 +847,11 @@ def n_to_remove(sudoku):
     return to_remove
 
 
-
-
+# Main Solver
+#############
 def solve(original_puzzle, verbose):
     
     report = [0]*10
-    #print (sudoku_to_line(original_puzzle))
     
     puzzle = pencil_in_numbers(original_puzzle)
     #print_sudoku(puzzle)
@@ -861,6 +863,7 @@ def solve(original_puzzle, verbose):
     t = time.time()
     
     all_at_once = False
+    
     while to_remove != 0:
         r_step = 0
         #solution
@@ -907,12 +910,6 @@ def solve(original_puzzle, verbose):
             r8 = medusa_3d(puzzle) 
             report[8] +=  r8
             r_step += r8
-##
-##        if r_step == 0:
-##            bug (puzzle)
-
-
-               
                 
         #check state
         solved = n_solved(puzzle)
@@ -954,6 +951,8 @@ def solve(original_puzzle, verbose):
     return puzzle
 
 
+# Intereface to covert line format to internal format and back
+############################################################
 def line_from_solution(sol):
     out = ""
     for a in sol:
@@ -972,9 +971,9 @@ def solve_from_line(line, verbose=False):
     return line_from_solution(solve(s_np, verbose))              
 
 
+# Short demo solving of a puzzle
+#################################
 if __name__ == "__main__":
-    
-    # Short demo solving of a puzzles
     
     puzzle = '100070009008096300050000020010000000940060072000000040030000080004720100200050003'
     #puzzle = '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
