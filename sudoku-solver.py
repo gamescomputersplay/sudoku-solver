@@ -858,7 +858,7 @@ def solve(original_puzzle):
     #print_sudoku(puzzle)
     solved = n_solved(puzzle)
     to_remove = n_to_remove(puzzle)
-    #print ("Solved:", solved,"/81. To remove:", to_remove)
+    print ("Puzzle:", solved,"/81. Condidates to remove:", to_remove)
 
     t = time.time()
     
@@ -920,11 +920,7 @@ def solve(original_puzzle):
         solved = n_solved(puzzle)
         to_remove = n_to_remove(puzzle)
 
-        # reporting
-        #print_sudoku(puzzle)
-        #print ("Solved:", solved,"/81. To remove:", to_remove)
-
-        # Nothing helped, we failed
+        # Nothing helped, logic failed
         if r_step == 0:
             break
 
@@ -935,8 +931,9 @@ def solve(original_puzzle):
     print ("Logic part took:", time.time()-t)
 
     if to_remove>0:
+        for_brute = n_to_remove(puzzle)
         puzzle = brute_force(puzzle)
-        report[9] += 1
+        report[9] += for_brute
     #print_sudoku(puzzle)
         
     # Report:
