@@ -790,7 +790,7 @@ def brute_force(s, verbose):
     
     if len(solution)>0:
         if verbose:
-            print ("Brute force took:", time.time()-t, "seconds, with", iter_counter, "attempts made")
+            print ("Backtracking took:", time.time()-t, "seconds, with", iter_counter, "attempts made")
         return solution
     
     # this is only if puzzle is broken and couldn't be forced
@@ -861,7 +861,7 @@ def solve(original_puzzle, verbose):
     solved = n_solved(puzzle)
     to_remove = n_to_remove(puzzle)
     if verbose:
-        print ("Initial puzzle: solved cells", solved,"/81. Condidates to remove:", to_remove)
+        print ("Initial puzzle: complete cells", solved,"/81. Condidates to remove:", to_remove)
 
     t = time.time()
     
@@ -931,7 +931,7 @@ def solve(original_puzzle, verbose):
 
     #print_sudoku(puzzle)
     if verbose:
-        print ("Solved with logic: numberof cells", solved,"/81. Candidates to remove:", to_remove)
+        print ("Solved with logic: number of complete cells", solved,"/81. Candidates to remove:", to_remove)
         print ("Logic part took:", time.time()-t)
 
     if to_remove>0:
@@ -941,17 +941,21 @@ def solve(original_puzzle, verbose):
     #print_sudoku(puzzle)
         
     # Report:
-    # 0: Simple elimination
-    # 1: Hidden single
-    # 2: CSP
-    # 3: Intersection
-    # 4: X-Wing
-    # 5: Coloring
-    # 6: Y-Wing
-    # 7: Nice chains
-    # 8: Medusa
+    legend = [
+    'Simple elimination',
+    'Hidden single',
+    'CSP',
+    'Intersection',
+    'X-Wing',
+    'Coloring',
+    'Y-Wing',
+    'Nice chains',
+    'Medusa',
+    'Backtraking']
     if verbose:
-        print ("Report:", report, " \n")
+        print ("Methods used:")
+        for i in range(len(legend)):
+            print ("\t",i, legend[i], ":", report[i])
     return puzzle
 
 
