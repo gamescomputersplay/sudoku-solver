@@ -3,32 +3,27 @@
 # https://youtu.be/ek8LDDt2M44
 
 import numpy as np
-import random
 import time
 
 
 
 
 
-##########################################
-# Some functions to iterate through houses
+# Some helper lists to iterate through houses
+#################################################
 
 # return columns' lists of cells 
-def all_columns():
-    return [[(i, j) for j in range(9)] for i in range(9)] 
+all_columns = [[(i, j) for j in range(9)] for i in range(9)]
 
 # same for rows
-def all_rows():
-    return [[(i, j) for i in range(9)] for j in range(9)]
+all_rows = [[(i, j) for i in range(9)] for j in range(9)]
 
 # same for blocks        
-def all_blocks():
-    # this list comprehension is unreadable, but quite cool!
-    return [[((i//3)*3+j//3,(i%3)*3+j%3) for j in range(9)] for i in range(9)]
+# this list comprehension is unreadable, but quite cool!
+all_blocks = [[((i//3)*3+j//3,(i%3)*3+j%3) for j in range(9)] for i in range(9)]
 
 # combine three
-def all_houses():
-    return all_columns()+all_rows()+all_blocks()
+all_houses = all_columns+all_rows+all_blocks
 
 
 # returns list [(0,0), (0,1) .. (a-1,b-1)]
@@ -57,7 +52,7 @@ def pencil_in_numbers(puzzle):
 # If there is one number in cell - remove it from the house
 def simple_elimination(sudoku):
     count = 0
-    for group in all_houses():
+    for group in all_houses:
         for cell in group:
             if len(sudoku[cell])==1:
                 for cell2 in group:
@@ -90,7 +85,7 @@ def hidden_single(sudoku):
             
     count = 0
     for number in range(1, 10):
-        for group in all_houses():
+        for group in all_houses:
             count += find_only_number_in_group()
     return count
 
@@ -131,7 +126,7 @@ def csp_list(inp):
 
 def csp(s):
     count = 0
-    for group in all_houses():
+    for group in all_houses:
         house = []
         for cell in group:
             house.append(s[cell])
@@ -164,8 +159,8 @@ def remove_n_from_cells(s, n, cells):
 
 def intersect(s):
     count = 0
-    for block in all_blocks():
-        for line in all_rows() + all_columns():
+    for block in all_blocks:
+        for line in all_rows + all_columns:
             
             # get the block/line/intersection coords
             sblock = set(block)
@@ -209,10 +204,10 @@ def x_wing(s):
         for h2 in range(h1+1,9):
             for v1 in range(0,9):
                 for v2 in range(v1+1,9):
-                    hline1 = all_rows()[h1]
-                    hline2 = all_rows()[h2]
-                    vline1 = all_columns()[v1]
-                    vline2 = all_columns()[v2]
+                    hline1 = all_rows[h1]
+                    hline2 = all_rows[h2]
+                    vline1 = all_columns[v1]
+                    vline2 = all_columns[v2]
                     
                     s_rows = set(hline1).union(set(hline2))
                     s_cols = set(vline1).union(set(vline2))
@@ -256,7 +251,7 @@ def get_a_hard_link(s, n, group, add_n=False):
 
 def get_all_hard_links(s, n, add_n=False):
     hard_links = []
-    for group in all_houses():
+    for group in all_houses:
         new_link = get_a_hard_link(s, n, group, add_n)
         if new_link !=[] and new_link not in hard_links:
             hard_links.append(new_link)
@@ -304,7 +299,7 @@ def ab_group(chain):
             
 def twice_in_a_house(s, n, a):
     result = 0 # sorry for inconsistency here, count was already taken and I was being lazy
-    for house in all_houses():
+    for house in all_houses:
         count = 0
         for cell in house:
             if cell in a and n in s[cell]:
@@ -323,7 +318,7 @@ def two_colors_elsewhere(s, n, all_a, all_b):
         spotted_a, spotted_b = False, False
         if (i,j) not in all_a and (i,j) not in all_b and n in s[i,j]:
             spotted_a, spotted_b = False, False
-            for house in all_houses():
+            for house in all_houses:
                 if (i,j) in house:
                     for a in all_a:
                         if a in house:
@@ -369,7 +364,7 @@ def y_wing(s):
                 link1[1] == link2[0] or link1[1] == link2[1]) and \
                 len(s[link1[0]])==2 and len(s[link1[1]])==2 and \
                 len(s[link2[0]])==2 and len(s[link2[1]])==2 :
-                for house in all_houses():
+                for house in all_houses:
                     if link1[0] in house and link1[1] in house \
                        and link2[0] in house and link2[1] in house:
                         break
@@ -406,7 +401,7 @@ def get_soft_links_from_group(s, n, group):
 
 def get_all_soft_links(s, n):
     soft_links = []
-    for group in all_houses():
+    for group in all_houses:
         new_links = get_soft_links_from_group(s, n, group)
         if new_links != []:
             soft_links += new_links
@@ -609,7 +604,7 @@ def same_color_twice_in_cell(s, a):
 
 def twice_in_a_house_medusa(s, a):
     count = 0
-    for house in all_houses():
+    for house in all_houses:
         n_count = [0]*9
         for cell in a:
             if cell[0] in house:
@@ -650,7 +645,7 @@ def two_colors_elsewhere_medusa(s, all_a, all_b):
         if not cell_in_chain((i,j), all_a) and not cell_in_chain((i,j), all_b):
             for n in s[i,j]:
                 spotted_a, spotted_b = False, False
-                for house in all_houses():
+                for house in all_houses:
                     if (i,j) in house:
                         for a in all_a:
                             if a[0] in house and a[1]==n:
@@ -678,7 +673,7 @@ def two_colors_unit_cell(s, all_a, all_b):
                 in_cell = get_n_cell_in_chain((i,j), a) # The number that is from the chain
                 for n in s[(i,j)]: # Go through the numbers in the cell
                     if n != in_cell: # Except for the one from the chain
-                        for house in all_houses(): # Look at all houses
+                        for house in all_houses: # Look at all houses
                             if (i,j) in house: # That the cell can see
                                 for cell in house: # and then look through house's cells
                                     if cell_in_chain(cell, b) and get_n_cell_in_chain(cell, b) == n: # Is there an item from another chain
@@ -695,7 +690,7 @@ def empty_by_color(s, all_a, all_b):
             if len(s[i,j])>1 and not cell_in_chain((i,j), a) and not cell_in_chain((i,j), b):
                 found = []
                 for n in s[i,j]:
-                    for house in all_houses():
+                    for house in all_houses:
                         if (i,j) in house:
                             for cell in house:
                                 if cell_in_chain(cell, a) and get_n_cell_in_chain(cell, a)==n:
@@ -737,7 +732,7 @@ def medusa_3d(s):
 
 
 def is_broken(s):
-    for house in all_houses():
+    for house in all_houses:
         house_data = []
         for cell in house:
             if len(s[cell])==1:
