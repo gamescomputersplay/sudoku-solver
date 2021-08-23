@@ -1,144 +1,12 @@
-# Sudoku Universe
+# Sudoku Solver
 
-import pyautogui
-from PIL import Image
+# https://youtu.be/ek8LDDt2M44
+
 import numpy as np
-import time
 import random
-import keyboard
-import os
+import time
 
 
-# Coordinates for getting the data from screenshot
-x1, x2, y1, y2 = [],[],[],[]
-
-# for pre-load samples
-samples = []            
-need_to_click=False # do you need to click to input a number
-
-total_report = []
-
-# Setting differeny recognision logics
-def set_version(v):
-    global x1, x2, y1, y2, samples, need_to_click
-    
-    if v=="universe":
-        x1 = [615, 685, 765, 850, 925, 1005, 1090, 1165, 1245]
-        y1 = [195, 265, 345, 430, 505, 585, 670, 745, 825]
-        x2 = [675, 755, 830, 915, 995, 1070, 1155, 1235, 1305]
-        y2 = [255, 335, 410, 495, 575, 650, 735, 815, 885]
-        for i in range(1, 10):
-            samples.append(Image.open("./samples/universe"+str(i)+".png"))
-        need_to_click=False
-        
-    if v=="websudoku":
-        x1 = [960, 1000, 1040, 1083, 1123, 1164, 1206, 1248, 1288]
-        y1 = [455, 498, 540, 584, 626, 668, 712, 752, 795]
-        x2 = [994, 1034, 1075, 1117, 1157, 1198, 1240, 1280, 1322]
-        y2 = [490, 532, 573, 617, 657, 701, 744, 787, 828]
-        for i in range(1, 10):
-            samples.append(Image.open("./samples/websudoku"+str(i)+".png"))
-        need_to_click=True
-    
-
-
-#####################
-# Some misc functions
-
-# return pixel's brightness
-def brightness(px):
-    return int((px[0]+px[1]+px[2])/3)
-
-# returns list [(0,0), (0,1) .. (a-1,b-1)]
-# kind of like "range" but for 2d array
-def range2(a, b):
-    permutations = []
-    for j in range(b):
-        for i in range(a):
-            permutations.append((i,j))
-    return permutations
-
-########################
-# Screenshot recognision
-
-# box that would cut out all white space around a number
-def shave_pic(im):
-    px = im.load()
-    #left
-    left, right, top, bottom = 0,0,0,0
-    found = False
-    for i in range(1, im.size[0]):
-        for j in range(im.size[1]):
-            if brightness(px[i,j])<250 and not found:
-                left = i-1
-                found = True
-                
-    if not found:
-        return (0,0,0,0)
-
-    #right
-    found = False
-    for i in range(im.size[0]-1, 0, -1):
-        for j in range(im.size[1]):
-            if brightness(px[i,j])<250 and not found:
-                right = i+1
-                found = True
-    
-    #top
-    found = False
-    for j in range(1, im.size[1]):
-        for i in range(im.size[0]):
-            if brightness(px[i,j])<250 and not found:
-                top = j-1
-                found = True
-    
-    #bottom
-    found = False
-    for j in range(im.size[1]-1, 0, -1):
-        for i in range(im.size[0]):
-            if brightness(px[i,j])<250 and not found:
-                bottom = j+1
-                found = True
-    
-    return ( left, top, right, bottom )
-
-# calculate the difference with a sample
-def difference(im, sample):
-    pim = im.load()
-    psm = sample.load()
-    diff = 0
-    for i in range(min(im.size[0], sample.size[0])):
-        for j in range(min(im.size[1], sample.size[1])):
-            diff += (brightness(pim[i,j]) - brightness(psm[i,j]))**2
-    return diff
-
-# return closest matching sample 
-def compare_to_sample(im):
-    for i in range(9):
-        if difference(im, samples[i]) == 0:
-            return i+1
-    return 999
-    
-# read the picture        
-def read_pic(im):
-    sudoku = np.zeros((len(x1),len(y1)), dtype=int)
-    for (j, i) in range2(9,9):
-        box = ( x1[i], y1[j], x2[i], y2[j] )
-        cell = im.crop(box)
-        shave_box = shave_pic(cell)
-        if shave_box != (0,0,0,0):
-            cell_shaved = cell.crop(shave_box)
-##            cell_shaved.save("sample"+str(i)+str(j)+".png")
-            cell_value = compare_to_sample(cell_shaved)
-            sudoku[i,j] = cell_value
-            #print (cell_value, end =" ")
-    return sudoku
-
-
-
-
-################################
-# Actual solver
 
 # Adding candidates instead of zeros
 def pencil_in_numbers(puzzle):
@@ -169,6 +37,17 @@ def all_blocks():
 # combine three
 def all_houses():
     return all_columns()+all_rows()+all_blocks()
+
+
+# returns list [(0,0), (0,1) .. (a-1,b-1)]
+# kind of like "range" but for 2d array
+def range2(a, b):
+    permutations = []
+    for j in range(b):
+        for i in range(a):
+            permutations.append((i,j))
+    return permutations
+
 
 
 ###################################
@@ -504,18 +383,6 @@ def y_wing(s):
                         if n in s[y_horns[2]] and n!=y_horns[1] and n!=y_horns[3]:
                             count += two_colors_elsewhere(s, n, (y_horns[0],), (y_horns[2],))
     return count
-
-#########################
-# B.U.G. logic
-def bug(s):
-    count = 0
-    for (i,j) in range2(9,9):
-        if len(s[i,j])>3:
-            return False
-        if len(s[i,j])==3:
-            count += 1
-    if (count == 1):
-        print ("B.U.G. found") # fiinish writting this strat then
 
 
 ################################
@@ -980,19 +847,6 @@ def n_to_remove(sudoku):
 
 
 
-def do_clicks(original, solved):
-    for (i, j) in range2(9,9):
-        if original[i,j] == 0 and len(solved[i,j])==1:
-            #print (i,j,solved[i,j][0])
-            pyautogui.moveTo(x1[i]+30, y1[j]+30)
-            if need_to_click:
-                pyautogui.click()
-            time.sleep(.02)
-
-            pyautogui.press(str(solved[i,j][0]))
-            time.sleep(.02)
-
-
 
 def solve(original_puzzle):
     global total_report
@@ -1006,7 +860,8 @@ def solve(original_puzzle):
     to_remove = n_to_remove(puzzle)
     #print ("Solved:", solved,"/81. To remove:", to_remove)
 
-    #t = time.time()
+    t = time.time()
+    
     all_at_once = False
     while to_remove != 0:
         r_step = 0
@@ -1075,9 +930,9 @@ def solve(original_puzzle):
 
         
 
-    #print ("Time:", time.time()-t)
     #print_sudoku(puzzle)
     print ("Solved:", solved,"/81. To remove:", to_remove)
+    print ("Logic part took:", time.time()-t)
 
     if to_remove>0:
         puzzle = brute_force(puzzle)
@@ -1095,55 +950,9 @@ def solve(original_puzzle):
     # 7: Nice chains
     # 8: Medusa
     print ("Report:", report, " \n")
-    total_report.append(report)
     return puzzle
 
 
-# Main function, that will recognize the screenshot and run different solving algorithms
-def main(im=""):    
-    
-    if im=="":
-        need_to_click = True
-        im = pyautogui.screenshot()
-        im.save("screenshot.png")
-    else:
-        need_to_click = False
-        im = Image.open(im)
-        
-    original_puzzle = read_pic(im)
-    solved_puzzle = solve(original_puzzle)
-
-    if need_to_click:
-        do_clicks(original_puzzle, solved_puzzle)
-
-    to_remove = n_to_remove(solved_puzzle)
-    return to_remove
-
-
-
-def screenshot():    
-    im = pyautogui.screenshot()
-    im.save("screenshot.png")
-keyboard.add_hotkey('f9', screenshot)
-
-def print_total_report():
-    total = len(total_report)
-    strats = [0]*10
-    for report in total_report:
-        for i in range(len(report)):
-            if report[i] > 0:
-                strats[i] += 1
-    print ("Total:", total)
-    print ("Simple elimination:", strats[0], strats[0]/total)
-    print ("Hidden single:", strats[1], strats[1]/total)
-    print ("CSP:", strats[2], strats[2]/total)
-    print ("Intersection:", strats[3], strats[3]/total)
-    print ("X-Wing:", strats[4], strats[4]/total)
-    print ("Coloring:", strats[5], strats[5]/total)
-    print ("Y-Wing:", strats[6], strats[6]/total)
-    print ("Nice chains:", strats[7], strats[7]/total)
-    print ("Medusa:", strats[8], strats[8]/total)
-    print ("Brute Force:", strats[9], strats[9]/total)
 
 
 def solve_from_line(line):
@@ -1156,41 +965,8 @@ def solve_from_line(line):
     #print (raw_s)
     return solve(s_np.transpose())                
 
-t = time.time()
-set_version("universe")
-##set_version("websudoku")
 
-
-## Run once
-##main('./to_solve/'+"069.png")
-##main('./all/'+"001.png")
-
-# Run in game
-keyboard.add_hotkey('f10', main)
-keyboard.wait('esc') 
-
-# Runn from line
-#solve_from_line('100070009008096300050000020010000000940060072000000040030000080004720100200050003')
+# Run from line
+solve_from_line('100070009008096300050000020010000000940060072000000040030000080004720100200050003')
 #solve_from_line('000000000000003085001020000000507000004000100090000000500000073002010000000040009')
 
-
-# Run all unsolved cases
-##
-##total_remaining = 0
-##solved = 0
-##folder = 'to_solve'
-##folder = 'all'
-##for file in os.listdir(folder):
-##   print (file)
-##   unsolved = main('./'+folder+'/'+file)
-##   total_remaining += unsolved
-##   if unsolved == 0:
-##       solved += 1
-##print ("\n"*3,"="*40)
-##print ("Total candidates remained:", total_remaining)
-##print ("Solved:", solved)
-
-print ("+"*40)
-print_total_report()
-print ("+"*40)
-print ("Total time:", time.time()-t)
