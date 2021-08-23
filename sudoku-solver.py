@@ -8,15 +8,7 @@ import time
 
 
 
-# Adding candidates instead of zeros
-def pencil_in_numbers(puzzle):
-    sudoku = np.empty((9,9), dtype=object)
-    for (j, i) in range2(9,9):
-        if puzzle[i,j] != 0:
-            sudoku[i][j] = [puzzle[i,j],]
-        else:
-            sudoku[i][j] = [1,2,3,4,5,6,7,8,9]
-    return sudoku
+
 
 ##########################################
 # Some functions to iterate through houses
@@ -48,6 +40,15 @@ def range2(a, b):
             permutations.append((i,j))
     return permutations
 
+# Adding candidates instead of zeros
+def pencil_in_numbers(puzzle):
+    sudoku = np.empty((9,9), dtype=object)
+    for (j, i) in range2(9,9):
+        if puzzle[i,j] != 0:
+            sudoku[i][j] = [puzzle[i,j],]
+        else:
+            sudoku[i][j] = [1,2,3,4,5,6,7,8,9]
+    return sudoku
 
 
 ###################################
@@ -849,7 +850,6 @@ def n_to_remove(sudoku):
 
 
 def solve(original_puzzle):
-    global total_report
     
     report = [0]*10
     #print (sudoku_to_line(original_puzzle))
@@ -953,7 +953,12 @@ def solve(original_puzzle):
     return puzzle
 
 
-
+def line_from_solution(sol):
+    out = ""
+    for a in sol:
+        for b in a:
+            out += str(b[0])
+    return out
 
 def solve_from_line(line):
     s_str = ""
@@ -963,10 +968,13 @@ def solve_from_line(line):
     s_np1 = np.fromstring(s_str, dtype=int, count=-1, sep=' ')
     s_np = np.reshape(s_np1, (9,9) )
     #print (raw_s)
-    return solve(s_np.transpose())                
+    return line_from_solution(solve(s_np))              
+
 
 
 # Run from line
-solve_from_line('100070009008096300050000020010000000940060072000000040030000080004720100200050003')
-#solve_from_line('000000000000003085001020000000507000004000100090000000500000073002010000000040009')
+puzzle = '100070009008096300050000020010000000940060072000000040030000080004720100200050003'
+#puzzle = '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
 
+solution = solve_from_line(puzzle)
+print (solution)
