@@ -25,7 +25,6 @@ all_houses = all_columns+all_rows+all_blocks
 
 # Some helper functions
 #################################################
-
 # returns list [(0,0), (0,1) .. (a-1,b-1)]
 # kind of like "range" but for 2d array
 def range2(a, b):
@@ -769,16 +768,17 @@ def medusa_3d(s):
 # 9. Backtracking
 # a.k.a. Brute Force
 #####################
-def is_broken(s):
-    for house in all_houses:
-        house_data = []
-        for cell in house:
-            if len(s[cell]) == 1:
-                house_data.append(s[cell][0])
-        if len(house_data) != len(set(house_data)):
-            return True
-    return False
 
+# Helper: list of houses of each cell
+# To optimize checking for broken puzzle
+def cellInHouse():
+    out = {(-1, -1):[]}
+    for (i, j) in range2(9, 9):
+        out[(i,j)] = []
+        for h in all_houses:
+            if (i, j) in h:
+                out[(i, j)].append(h)
+    return out
 
 def get_next_cell_to_force(s):
     for (i, j) in range2(9, 9):
@@ -791,7 +791,19 @@ def brute_force(s, verbose):
     t = time.time()
     iter_counter = 0
 
-    def iteration(s):
+    cellHouse = cellInHouse()
+    
+    def is_broken(s, last_cell):
+        for house in cellHouse[last_cell]:
+            house_data = []
+            for cell in house:
+                if len(s[cell]) == 1:
+                    house_data.append(s[cell][0])
+            if len(house_data) != len(set(house_data)):
+                return True
+        return False
+
+    def iteration(s, last_cell=(-1,-1)):
         nonlocal solution
         nonlocal iter_counter
 
@@ -800,7 +812,7 @@ def brute_force(s, verbose):
             print ("Iteration", iter_counter)
 
         # is broken - return fail
-        if is_broken(s):
+        if is_broken(s, last_cell):
             return -1
 
         # is solved - return success
@@ -816,7 +828,7 @@ def brute_force(s, verbose):
         for n in s[next_cell]:
             scopy = s.copy()
             scopy[next_cell] = [n]
-            result = iteration(scopy)
+            result = iteration(scopy, next_cell)
             if result == 1:
                 return
 
@@ -842,7 +854,7 @@ def solve(original_puzzle, verbose):
     solved = n_solved(puzzle)
     to_remove = n_to_remove(puzzle)
     if verbose:
-        print ("Initial puzzle: complete cells", solved, "/81. Condidates to remove:", to_remove)
+        print ("Initial puzzle: complete cells", solved, "/81. Candidates to remove:", to_remove)
 
     t = time.time()
 
@@ -925,8 +937,8 @@ def solve(original_puzzle, verbose):
             'Coloring',
             'Y-Wing',
             'Nice chains',
-            'Medusa',
-            'Backtraking']
+            '3D Medusa',
+            'Backtracking']
     if verbose:
         print ("Methods used:")
         for i in range(len(legend)):
@@ -934,7 +946,7 @@ def solve(original_puzzle, verbose):
     return puzzle
 
 
-# Intereface to covert line format to internal format and back
+# Intereface to convert line format to internal format and back
 ############################################################
 def line_from_solution(sol):
     out = ""
@@ -954,13 +966,37 @@ def solve_from_line(line, verbose=False):
     return line_from_solution(solve(s_np, verbose))             
 
 
+
 # Short demo solving of a puzzle
 #################################
 if __name__ == "__main__":
 
-    puzzle = '100070009008096300050000020010000000940060072000000040030000080004720100200050003'
-    # puzzle = '000000000000003085001020000000507000004000100090000000500000073002010000000040009'
+    print ("Sudoku Solver Demo")
 
-    solution = solve_from_line(puzzle, verbose=True)
+    # Easy and Medium puzzles: courtesy of Sudoku Universe Game]
+    # Difficult Named puzzles: courtesy of sudokuwiki.org
 
-    print (solution)
+    puzzles = [
+("Easy",
+'000000000000003085001020000000507000004000100090000000500000073002010000000040009'
+ ),
+("Medium",
+'100070009008096300050000020010000000940060072000000040030000080004720100200050003'
+),
+("Escargot",
+"100007090030020008009600500005300900010080002600004000300000010041000007007000300"
+),
+("Steering Wheel",
+"000102000060000070008000900400000003050007000200080001009000805070000060000304000"
+),
+("Arto Inkala",
+"800000000003600000070090200050007000000045700000100030001000068008500010090000400"
+)
+    ]
+
+    for puzzleName, puzzle in puzzles:
+        print ("Puzzle", puzzleName)
+        print (puzzle)
+        solution = solve_from_line(puzzle, verbose=True)
+        print (solution)
+        print ("="*80)
