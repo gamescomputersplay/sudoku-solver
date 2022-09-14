@@ -737,9 +737,10 @@ def empty_by_color(s, all_a, all_b):
                                 if cell_in_chain(cell, a) and get_n_cell_in_chain(cell, a) == n:
                                     found.append( get_n_cell_in_chain(cell, a) )
                 if set(found) == set(s[i, j]):
-                    for cell in a:
-                        s[cell[0]].remove(cell[1])
-                        count += 1
+                    for cell in a: 
+                        if cell[1] in s[cell[0]]:
+                            s[cell[0]].remove(cell[1])
+                            count += 1
                     return count
     return count
 
